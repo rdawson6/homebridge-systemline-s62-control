@@ -1,0 +1,114 @@
+{
+    "pluginAlias": "SystemlineS62",
+    "pluginType": "platform",
+    "singular": true,
+    "headerDisplay": "Control the Systemline S6.2 multi-room audio system from HomeKit. Each zone appears as a TV accessory with source selection and volume control.",
+    "footerDisplay": "Sources are defined by their S6.2 source number (1–6). Zones are defined by their S6.2 zone number (1–8). No RS232 commands needed — all generated automatically.",
+    "schema": {
+        "type": "object",
+        "properties": {
+            "name": {
+                "title": "Platform Name",
+                "type": "string",
+                "default": "Systemline S6.2"
+            },
+            "host": {
+                "title": "iTach IP2SL IP Address",
+                "type": "string",
+                "placeholder": "192.168.4.200",
+                "required": true
+            },
+            "port": {
+                "title": "iTach TCP Port",
+                "type": "integer",
+                "default": 4999
+            },
+            "sources": {
+                "title": "Sources",
+                "type": "array",
+                "items": {
+                    "title": "Source",
+                    "type": "object",
+                    "properties": {
+                        "id": {
+                            "title": "Source Number",
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 6,
+                            "required": true,
+                            "description": "S6.2 source number (1–6)"
+                        },
+                        "name": {
+                            "title": "Source Name",
+                            "type": "string",
+                            "required": true,
+                            "placeholder": "Sky Q"
+                        }
+                    }
+                }
+            },
+            "zones": {
+                "title": "Zones",
+                "type": "array",
+                "items": {
+                    "title": "Zone",
+                    "type": "object",
+                    "properties": {
+                        "id": {
+                            "title": "Zone Number",
+                            "type": "integer",
+                            "minimum": 1,
+                            "maximum": 8,
+                            "required": true,
+                            "description": "S6.2 zone number (1–8)"
+                        },
+                        "name": {
+                            "title": "Zone Name",
+                            "type": "string",
+                            "required": true,
+                            "placeholder": "Kitchen"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "layout": [
+        {
+            "type": "section",
+            "title": "iTach IP2SL",
+            "expandable": false,
+            "items": ["name", "host", "port"]
+        },
+        {
+            "type": "section",
+            "title": "Sources",
+            "description": "Define the sources connected to your S6.2 by their source number (1–6) and a friendly name.",
+            "expandable": true,
+            "expanded": true,
+            "items": [
+                {
+                    "key": "sources",
+                    "type": "array",
+                    "buttonText": "Add Source",
+                    "items": ["sources[].id", "sources[].name"]
+                }
+            ]
+        },
+        {
+            "type": "section",
+            "title": "Zones",
+            "description": "Define the zones you want to control by their zone number (1–8) and a friendly name.",
+            "expandable": true,
+            "expanded": true,
+            "items": [
+                {
+                    "key": "zones",
+                    "type": "array",
+                    "buttonText": "Add Zone",
+                    "items": ["zones[].id", "zones[].name"]
+                }
+            ]
+        }
+    ]
+}
