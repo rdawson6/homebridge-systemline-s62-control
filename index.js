@@ -1,6 +1,6 @@
 var net = require("net");
 
-var PLUGIN_NAME   = "homebridge-systemline-s62";
+var PLUGIN_NAME   = "homebridge-systemline-s62-control";
 var PLATFORM_NAME = "SystemlineS62";
 
 /* =============================================================================

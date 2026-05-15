@@ -1,8 +1,8 @@
-# homebridge-systemline-s62
+# homebridge-systemline-s62-control
 
 A [Homebridge](https://homebridge.io) plugin for the **Systemline S6.2** multi-room audio system. Each zone appears as a **TV accessory** in HomeKit with source selection and volume control via a **Global Cache iTach IP2SL** RS232 interface.
 
-[![npm](https://img.shields.io/npm/v/homebridge-systemline-s62)](https://www.npmjs.com/package/homebridge-systemline-s62)
+[![npm](https://img.shields.io/npm/v/homebridge-systemline-s62-control)](https://www.npmjs.com/package/homebridge-systemline-s62-control)
 [![Homebridge v2](https://img.shields.io/badge/homebridge-%5E1.0.0%20%7C%7C%20%5E2.0.0-blueviolet)](https://homebridge.io)
 
 > **Looking for switch-based control?** See [homebridge-globalcache-gc100-kiro](https://www.npmjs.com/package/homebridge-globalcache-gc100-kiro) which exposes zones as simple on/off switches — useful for automations that don't need source selection.

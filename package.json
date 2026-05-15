@@ -1,5 +1,5 @@
 {
-  "name": "homebridge-systemline-s62",
+  "name": "homebridge-systemline-s62-control",
   "version": "1.0.0",
   "displayName": "Systemline S6.2",
   "description": "Homebridge plugin for the Systemline S6.2 multi-room audio system. Each zone appears as a TV accessory with source selection and volume control via a Global Cache iTach IP2SL RS232 interface.",
@@ -38,12 +38,12 @@
     "homebridge": "^1.0.0 || ^2.0.0"
   },
   "dependencies": {},
-  "homepage": "https://github.com/rdawson6/homebridge-systemline-s62#readme",
+  "homepage": "https://github.com/rdawson6/homebridge-systemline-s62-control#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/rdawson6/homebridge-systemline-s62"
+    "url": "https://github.com/rdawson6/homebridge-systemline-s62-control"
   },
   "bugs": {
-    "url": "https://github.com/rdawson6/homebridge-systemline-s62/issues"
+    "url": "https://github.com/rdawson6/homebridge-systemline-s62-control/issues"
   }
 }
