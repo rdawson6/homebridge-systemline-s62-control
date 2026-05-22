@@ -390,23 +390,13 @@ SystemlineS62Platform.prototype._indexToSourceId = function(index) {
    Characteristic handlers
    ============================================================================= */
 
-/* Active (power) */
+/* Active (power) — return cache only, never query on get */
 SystemlineS62Platform.prototype._getActive = function(zoneId, accessory, callback) {
   var Characteristic = this.api.hap.Characteristic;
   var ctx = accessory.context.zones[zoneId];
-
-  if (ctx.cachedActive !== null) {
-    return callback(null, ctx.cachedActive
-      ? Characteristic.Active.ACTIVE
-      : Characteristic.Active.INACTIVE);
-  }
-
-  this._enqueue(this._cmdGetSource(zoneId), function(err, response) {
-    if (err) return callback(null, Characteristic.Active.INACTIVE);
-    var isOn = response && !response.includes("srcoff");
-    ctx.cachedActive = isOn;
-    callback(null, isOn ? Characteristic.Active.ACTIVE : Characteristic.Active.INACTIVE);
-  });
+  // Return cached value — startup query populates this. Default inactive until known.
+  var isOn = (ctx.cachedActive === true);
+  callback(null, isOn ? Characteristic.Active.ACTIVE : Characteristic.Active.INACTIVE);
 };
 
 SystemlineS62Platform.prototype._setActive = function(zoneId, value, accessory, callback) {
@@ -430,25 +420,10 @@ SystemlineS62Platform.prototype._setActive = function(zoneId, value, accessory, 
   }
 };
 
-/* ActiveIdentifier (source selection) */
+/* ActiveIdentifier (source selection) — return cache only */
 SystemlineS62Platform.prototype._getActiveIdentifier = function(zoneId, accessory, callback) {
-  var self = this;
-  var ctx  = accessory.context.zones[zoneId];
-
-  if (ctx.cachedSourceIndex !== null) {
-    return callback(null, ctx.cachedSourceIndex);
-  }
-
-  this._enqueue(this._cmdGetSource(zoneId), function(err, response) {
-    if (err || !response || response.includes("srcoff")) return callback(null, 0);
-    var match = response.match(/\$r\d+src(\d+)/);
-    if (match) {
-      var idx = self._sourceIdToIndex(parseInt(match[1]));
-      if (idx >= 0) ctx.cachedSourceIndex = idx;
-      return callback(null, idx >= 0 ? idx : 0);
-    }
-    callback(null, 0);
-  });
+  var ctx = accessory.context.zones[zoneId];
+  callback(null, ctx.cachedSourceIndex !== null ? ctx.cachedSourceIndex : 0);
 };
 
 SystemlineS62Platform.prototype._setActiveIdentifier = function(zoneId, value, accessory, callback) {
@@ -474,14 +449,10 @@ SystemlineS62Platform.prototype._handleRemoteKey = function(zoneId, value, acces
   }
 };
 
-/* Mute */
+/* Mute — return cache only */
 SystemlineS62Platform.prototype._getMute = function(zoneId, accessory, callback) {
   var ctx = accessory.context.zones[zoneId];
-  if (ctx.cachedVolume !== null) return callback(null, ctx.cachedVolume === 0);
-  this._enqueue(this._cmdGetVolume(zoneId), function(err, response) {
-    if (err) return callback(null, false);
-    callback(null, !!(response && response.includes("volmute")));
-  });
+  callback(null, ctx.cachedVolume === 0);
 };
 
 SystemlineS62Platform.prototype._setMute = function(zoneId, value, accessory, callback) {
@@ -495,22 +466,11 @@ SystemlineS62Platform.prototype._setMute = function(zoneId, value, accessory, ca
   });
 };
 
-/* Volume percentage */
+/* Volume percentage — return cache only */
 SystemlineS62Platform.prototype._getVolumePct = function(zoneId, accessory, callback) {
   var ctx = accessory.context.zones[zoneId];
-  if (ctx.cachedVolume !== null) {
-    return callback(null, Math.round(ctx.cachedVolume * 100 / 30));
-  }
-  this._enqueue(this._cmdGetVolume(zoneId), function(err, response) {
-    if (err) return callback(null, 0);
-    if (response && response.includes("volmute")) { ctx.cachedVolume = 0; return callback(null, 0); }
-    var match = response && response.match(/\$r\d+vol(\d+)/);
-    if (match) {
-      ctx.cachedVolume = parseInt(match[1]);
-      return callback(null, Math.round(ctx.cachedVolume * 100 / 30));
-    }
-    callback(null, 0);
-  });
+  var pct = ctx.cachedVolume !== null ? Math.round(ctx.cachedVolume * 100 / 30) : 0;
+  callback(null, pct);
 };
 
 SystemlineS62Platform.prototype._setVolumePct = function(zoneId, value, accessory, callback) {
