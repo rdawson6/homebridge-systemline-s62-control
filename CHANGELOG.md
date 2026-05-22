@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.0.2] - 2026-05-22
+
+### Added
+- `maxVolume` config option (default 25) — maps the 0–100% slider to 0–maxVolume on the S6.2, giving finer volume control. The S6.2 hardware maximum is 30; lower values make the slider less sensitive.
+
 ## [1.0.1] - 2026-05-22
 
 ### Fixed

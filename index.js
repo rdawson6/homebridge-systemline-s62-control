@@ -41,10 +41,11 @@ function SystemlineS62Platform(log, config, api) {
   this.log      = log;
   this.config   = config;
   this.api      = api;
-  this.host     = config.host;
-  this.port     = parseInt(config.port) || 4999;
-  this.sources  = config.sources || [];
-  this.zones    = config.zones   || [];
+  this.host      = config.host;
+  this.port      = parseInt(config.port) || 4999;
+  this.sources   = config.sources || [];
+  this.zones     = config.zones   || [];
+  this.maxVolume = parseInt(config.maxVolume) || 25;  // S6.2 max is 30; lower = finer slider control
 
   // Shared serial queue — one socket open at a time
   this._queue   = [];
@@ -293,10 +294,10 @@ SystemlineS62Platform.prototype._startupQuery = function(zoneId, accessory, tvSe
     var match = response && response.match(/\$r\d+vol(\d+)/);
     if (match) {
       ctx.cachedVolume = parseInt(match[1]);
-      var pct = Math.round(ctx.cachedVolume * 100 / 30);
+      var pct = Math.round(ctx.cachedVolume * 100 / self.maxVolume);
       volService.getCharacteristic(Characteristic.Brightness).updateValue(pct);
       volService.getCharacteristic(Characteristic.On).updateValue(ctx.cachedVolume > 0);
-      self.log("[Zone " + zoneId + "] Ready: src=" + (ctx.cachedSourceIndex !== null ? ctx.cachedSourceIndex : "?") + " vol=" + ctx.cachedVolume + "/30 active=" + ctx.cachedActive);
+      self.log("[Zone " + zoneId + "] Ready: src=" + (ctx.cachedSourceIndex !== null ? ctx.cachedSourceIndex : "?") + " vol=" + ctx.cachedVolume + "/" + self.maxVolume + " active=" + ctx.cachedActive);
     }
   });
 };
@@ -469,14 +470,14 @@ SystemlineS62Platform.prototype._setMute = function(zoneId, value, accessory, ca
 /* Volume percentage — return cache only */
 SystemlineS62Platform.prototype._getVolumePct = function(zoneId, accessory, callback) {
   var ctx = accessory.context.zones[zoneId];
-  var pct = ctx.cachedVolume !== null ? Math.round(ctx.cachedVolume * 100 / 30) : 0;
-  callback(null, pct);
+  var pct = ctx.cachedVolume !== null ? Math.round(ctx.cachedVolume * 100 / this.maxVolume) : 0;
+  callback(null, Math.min(100, pct));  // cap at 100% in case vol exceeds maxVolume
 };
 
 SystemlineS62Platform.prototype._setVolumePct = function(zoneId, value, accessory, callback) {
   var self   = this;
   var ctx    = accessory.context.zones[zoneId];
-  var s62vol = Math.round(value * 30 / 100);
+  var s62vol = Math.round(value * this.maxVolume / 100);
 
   // Respond to HomeKit immediately — never block the UI
   callback(null);
@@ -486,7 +487,7 @@ SystemlineS62Platform.prototype._setVolumePct = function(zoneId, value, accessor
   if (ctx.debounceTimer) { clearTimeout(ctx.debounceTimer); ctx.debounceTimer = null; }
   ctx.debounceTimer = setTimeout(function() {
     ctx.debounceTimer = null;
-    self.log("[Zone " + zoneId + "] Volume → " + s62vol + "/30 (" + value + "%) [debounced]");
+    self.log("[Zone " + zoneId + "] Volume → " + s62vol + "/" + self.maxVolume + " (" + value + "%) [debounced]");
     self._enqueue(self._cmdSetVolume(zoneId, s62vol), function(err) {
       if (err) { self.log("[Zone " + zoneId + "] Volume set failed: " + err.message); ctx.cachedVolume = null; }
     });
@@ -499,9 +500,9 @@ SystemlineS62Platform.prototype._adjustVolume = function(zoneId, delta, accessor
   var ctx  = accessory.context.zones[zoneId];
 
   function applyDelta(current) {
-    var newVol = Math.max(0, Math.min(30, current + delta));
+    var newVol = Math.max(0, Math.min(self.maxVolume, current + delta));
     ctx.cachedVolume = newVol;
-    self.log("[Zone " + zoneId + "] Volume " + (delta > 0 ? "▲" : "▼") + " → " + newVol + "/30");
+    self.log("[Zone " + zoneId + "] Volume " + (delta > 0 ? "▲" : "▼") + " → " + newVol + "/" + self.maxVolume);
     self._enqueue(self._cmdSetVolume(zoneId, newVol), function(err) {
       callback(err || null);
     });

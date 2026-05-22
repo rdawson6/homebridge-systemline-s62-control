@@ -1,6 +1,6 @@
 {
   "name": "homebridge-systemline-s62-control",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "displayName": "Systemline S6.2",
   "description": "Homebridge plugin for the Systemline S6.2 multi-room audio system. Each zone appears as a TV accessory with source selection and volume control via a Global Cache iTach IP2SL RS232 interface.",
   "main": "index.js",
